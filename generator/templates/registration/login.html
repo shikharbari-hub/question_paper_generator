@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — QuestionAI</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#2563ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="QuestionAI">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink:      #0d0e12;
+      --ink-soft: #5a5f72;
+      --surface:  #f4f3ef;
+      --card:     #ffffff;
+      --accent:   #2563ff;
+      --success:  #1a7a4a;
+      --border:   #e2e0d8;
+      --radius:   14px;
+      --shadow:   0 2px 12px rgba(0,0,0,.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-link {
+      font-size: .875rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-link:hover { color: var(--ink); }
+
+    /* ── Center layout ── */
+    .page-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ── Auth card ── */
+    .auth-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-badge {
+      display: inline-block;
+      background: #e8eeff;
+      color: var(--accent);
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .28rem .7rem;
+      border-radius: 99px;
+      margin-bottom: .9rem;
+    }
+    .auth-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: .35rem;
+    }
+    .auth-title span { color: var(--accent); }
+    .auth-sub {
+      font-size: .875rem;
+      color: var(--ink-soft);
+      margin-bottom: 1.75rem;
+      line-height: 1.55;
+    }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 1.1rem; }
+    label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: .4rem;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,255,.12);
+    }
+
+    /* ── Error messages ── */
+    .error-list {
+      background: #fff3f3;
+      border: 1px solid #ffcccc;
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      margin-bottom: 1.25rem;
+      list-style: none;
+    }
+    .error-list li {
+      color: #c62828;
+      font-size: .85rem;
+      line-height: 1.5;
+    }
+    .error-list li + li { margin-top: .25rem; }
+
+    /* ── Non-field errors ── */
+    .non-field-error {
+      background: #fff3f3;
+      border: 1px solid #ffcccc;
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      color: #c62828;
+      font-size: .875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      padding: .95rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      margin-top: .5rem;
+    }
+    .btn-submit:hover { background: #1a4fe0; }
+    .btn-submit:active { transform: scale(.98); }
+
+    /* ── Footer link ── */
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: .875rem;
+      color: var(--ink-soft);
+    }
+    .auth-footer a {
+      color: var(--accent);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin: 1.5rem 0;
+      color: var(--ink-soft);
+      font-size: .8rem;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">Question<span>AI</span></a>
+  <a class="nav-link" href="{% url 'signup' %}">Sign up →</a>
+</nav>
+
+<div class="page-center">
+  <div class="auth-card">
+
+    <div class="auth-badge">✦ Welcome back</div>
+    <h1 class="auth-title">Log in to <span>QuestionAI</span></h1>
+    <p class="auth-sub">Enter your credentials to continue generating questions.</p>
+
+    <!-- Non-field errors (wrong password etc.) -->
+    {% if form.non_field_errors %}
+    <div class="non-field-error">
+      ⚠ {{ form.non_field_errors|join:", " }}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div class="field">
+        <label for="id_username">Username</label>
+        <input type="text"
+               name="username"
+               id="id_username"
+               placeholder="Enter your username"
+               value="{{ form.username.value|default:'' }}"
+               autocomplete="username"
+               required>
+        {% if form.username.errors %}
+        <ul class="error-list" style="margin-top:.4rem;margin-bottom:0">
+          {% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label for="id_password">Password</label>
+        <input type="password"
+               name="password"
+               id="id_password"
+               placeholder="Enter your password"
+               autocomplete="current-password"
+               required>
+        {% if form.password.errors %}
+        <ul class="error-list" style="margin-top:.4rem;margin-bottom:0">
+          {% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <!-- Next field (Django auth requires this) -->
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <button type="submit" class="btn-submit">Log in</button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <div class="auth-footer">
+      Account nahi hai? <a href="{% url 'signup' %}">Sign up free</a>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

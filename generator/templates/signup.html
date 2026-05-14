@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — QuestionAI</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#2563ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="QuestionAI">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink:      #0d0e12;
+      --ink-soft: #5a5f72;
+      --surface:  #f4f3ef;
+      --card:     #ffffff;
+      --accent:   #2563ff;
+      --success:  #1a7a4a;
+      --border:   #e2e0d8;
+      --radius:   14px;
+      --shadow:   0 2px 12px rgba(0,0,0,.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-link {
+      font-size: .875rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-link:hover { color: var(--ink); }
+
+    /* ── Center layout ── */
+    .page-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ── Auth card ── */
+    .auth-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-badge {
+      display: inline-block;
+      background: #e8eeff;
+      color: var(--accent);
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .28rem .7rem;
+      border-radius: 99px;
+      margin-bottom: .9rem;
+    }
+    .auth-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: .35rem;
+    }
+    .auth-title span { color: var(--accent); }
+    .auth-sub {
+      font-size: .875rem;
+      color: var(--ink-soft);
+      margin-bottom: 1.75rem;
+      line-height: 1.55;
+    }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 1.1rem; }
+    label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: .4rem;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,255,.12);
+    }
+
+    /* ── Password hint ── */
+    .hint {
+      font-size: .75rem;
+      color: var(--ink-soft);
+      margin-top: .35rem;
+      line-height: 1.5;
+    }
+
+    /* ── Error messages ── */
+    .error-list {
+      list-style: none;
+      margin-top: .4rem;
+    }
+    .error-list li {
+      background: #fff3f3;
+      border: 1px solid #ffcccc;
+      border-radius: 7px;
+      padding: .4rem .75rem;
+      color: #c62828;
+      font-size: .82rem;
+      margin-top: .3rem;
+    }
+
+    /* ── Password strength bar ── */
+    .strength-wrap { margin-top: .5rem; }
+    .strength-bar {
+      height: 4px;
+      border-radius: 99px;
+      background: var(--border);
+      overflow: hidden;
+      margin-bottom: .3rem;
+    }
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      transition: width .3s, background .3s;
+    }
+    .strength-label {
+      font-size: .72rem;
+      color: var(--ink-soft);
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      padding: .95rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      margin-top: .5rem;
+    }
+    .btn-submit:hover { background: #1a4fe0; }
+    .btn-submit:active { transform: scale(.98); }
+
+    /* ── Footer ── */
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: .875rem;
+      color: var(--ink-soft);
+    }
+    .auth-footer a {
+      color: var(--accent);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin: 1.5rem 0;
+      color: var(--ink-soft);
+      font-size: .8rem;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Benefits strip ── */
+    .benefits {
+      display: flex;
+      justify-content: space-between;
+      gap: .5rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .benefit {
+      font-size: .75rem;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .benefit-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">Question<span>AI</span></a>
+  <a class="nav-link" href="{% url 'login' %}">Log in →</a>
+</nav>
+
+<div class="page-center">
+  <div class="auth-card">
+
+    <div class="auth-badge">✦ Free forever</div>
+    <h1 class="auth-title">Join <span>QuestionAI</span></h1>
+    <p class="auth-sub">Account banao aur unlimited MCQs generate karo.</p>
+
+    <!-- Benefits -->
+    <div class="benefits">
+      <span class="benefit"><span class="benefit-dot"></span>AI-powered MCQs</span>
+      <span class="benefit"><span class="benefit-dot"></span>PDF export</span>
+      <span class="benefit"><span class="benefit-dot"></span>Any topic</span>
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div class="field">
+        <label for="id_username">Username</label>
+        <input type="text"
+               name="username"
+               id="id_username"
+               placeholder="Choose a username"
+               value="{{ form.username.value|default:'' }}"
+               autocomplete="username"
+               maxlength="150"
+               required>
+        {% if form.username.errors %}
+        <ul class="error-list">
+          {% for e in form.username.errors %}<li>⚠ {{ e }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <!-- Password 1 -->
+      <div class="field">
+        <label for="id_password1">Password</label>
+        <input type="password"
+               name="password1"
+               id="id_password1"
+               placeholder="Create a strong password"
+               autocomplete="new-password"
+               required>
+
+        <!-- Strength bar -->
+        <div class="strength-wrap">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <span class="strength-label" id="strength-label">Password likhna shuru karo</span>
+        </div>
+
+        {% if form.password1.errors %}
+        <ul class="error-list">
+          {% for e in form.password1.errors %}<li>⚠ {{ e }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        <p class="hint">Min 8 characters · Numbers ya symbols use karo</p>
+      </div>
+
+      <!-- Password 2 -->
+      <div class="field">
+        <label for="id_password2">Confirm Password</label>
+        <input type="password"
+               name="password2"
+               id="id_password2"
+               placeholder="Password dobara likhो"
+               autocomplete="new-password"
+               required>
+        {% if form.password2.errors %}
+        <ul class="error-list">
+          {% for e in form.password2.errors %}<li>⚠ {{ e }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn-submit">Create Account</button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <div class="auth-footer">
+      Pehle se account hai? <a href="{% url 'login' %}">Log in</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ── Password strength meter ── */
+  const pwInput = document.getElementById('id_password1');
+  const fill    = document.getElementById('strength-fill');
+  const lbl     = document.getElementById('strength-label');
+
+  pwInput.addEventListener('input', () => {
+    const val = pwInput.value;
+    let score = 0;
+    if (val.length >= 8)              score++;
+    if (/[A-Z]/.test(val))            score++;
+    if (/[0-9]/.test(val))            score++;
+    if (/[^A-Za-z0-9]/.test(val))     score++;
+
+    const map = [
+      { w: '0%',   bg: 'transparent', text: 'Password likhna shuru karo' },
+      { w: '25%',  bg: '#ef4444',     text: 'Weak — aur lamba karo' },
+      { w: '50%',  bg: '#f97316',     text: 'Fair — numbers add karo' },
+      { w: '75%',  bg: '#eab308',     text: 'Good — almost there!' },
+      { w: '100%', bg: '#22c55e',     text: 'Strong ✓' },
+    ];
+
+    fill.style.width      = map[score].w;
+    fill.style.background = map[score].bg;
+    lbl.textContent       = map[score].text;
+  });
+</script>
+</body>
+</html>
