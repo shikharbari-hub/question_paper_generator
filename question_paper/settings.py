@@ -44,7 +44,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'question_paper.urls'
  
 # ✅ API Key — production mein .env file mein rakho
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
  
 TEMPLATES = [
     {
