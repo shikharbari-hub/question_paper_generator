@@ -18,8 +18,11 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
  
 SECRET_KEY = 'django-insecure-^m9$vbdk@d&u07)_kfx5-!*818#u-jqn&gbxab&tk!erv-b_@5'
  
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://question-paper-generator-n7gm.onrender.com',
+]
  
 INSTALLED_APPS = [
     'django.contrib.admin',
