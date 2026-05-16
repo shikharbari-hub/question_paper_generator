@@ -157,7 +157,7 @@ def _generate_questions(topic: str, total: int, difficulty: str, language: str) 
 # Views
 # ---------------------------------------------------------------------------
 
-@login_required
+#@login_required
 def ai_generate(request):
     questions = []
     error = None

@@ -168,7 +168,7 @@
   <div class="error-box">⚠ {{ error }}</div>
   {% endif %}
 
-  <form method="POST" id="gen-form">
+  <form method="POST" action="{% url 'ai_generate' %}" id="gen-form">
     {% csrf_token %}
 
     <!-- Topic + Num -->
