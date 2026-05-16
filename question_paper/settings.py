@@ -85,7 +85,6 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ✅ Session persistent — deploy pe reset na ho
-SESSION_ENGINE = 'django.contrib.sessions.backends.file'
-SESSION_FILE_PATH = '/tmp/django_sessions'
+
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 din tak login rahe
 SESSION_SAVE_EVERY_REQUEST = True
