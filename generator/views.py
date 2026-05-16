@@ -30,7 +30,7 @@ def _call_openrouter(prompt: str) -> list:
             "Content-Type": "application/json",
         },
         json={
-            "model": "openai/gpt-4o-mini",
+            "model": "meta-llama/llama-3.1-8b-instruct:free",
             "messages": [
                 {
                     "role": "system",
