@@ -32,7 +32,6 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); min-height: 100vh; }
 
-    /* ── Nav ── */
     nav {
       display: flex; align-items: center; justify-content: space-between;
       padding: 1rem 2.5rem; background: var(--card);
@@ -42,68 +41,42 @@
     .nav-brand span { color: var(--accent); }
     nav a.nav-link { font-size: .875rem; color: var(--ink-soft); text-decoration: none; transition: color .2s; }
     nav a.nav-link:hover { color: var(--ink); }
+    .nav-logout-form { display: inline; }
+    .nav-logout-btn { background: none; border: none; font-size: .875rem; color: var(--ink-soft); cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; }
+    .nav-logout-btn:hover { color: var(--ink); }
 
-    /* ── Hero ── */
-    .hero { max-width: 760px; margin: 3rem auto 2rem; padding: 0 1.5rem; text-align: center; }
+    .hero { max-width: 760px; margin: 4rem auto 2rem; padding: 0 1.5rem; text-align: center; }
     .badge { display: inline-block; background: #e8eeff; color: var(--accent); font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: .3rem .75rem; border-radius: 99px; margin-bottom: 1rem; }
-    h1 { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800; line-height: 1.15; letter-spacing: -.03em; margin-bottom: .75rem; }
+    h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.15; letter-spacing: -.03em; margin-bottom: .75rem; }
     h1 em { color: var(--accent); font-style: normal; }
-    .subtitle { font-size: 1rem; color: var(--ink-soft); max-width: 540px; margin: 0 auto 2rem; line-height: 1.65; }
+    .subtitle { font-size: 1.05rem; color: var(--ink-soft); max-width: 540px; margin: 0 auto 2.5rem; line-height: 1.65; }
 
-    /* ── Generator card ── */
     .gen-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem 2.5rem; max-width: 680px; margin: 0 auto 2.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 160px; gap: 1rem; margin-bottom: 1.25rem; }
+    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
 
-    /* ── Form rows ── */
-    .form-row { display: grid; grid-template-columns: 1fr 160px; gap: 1rem; margin-bottom: 1rem; }
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    @media (max-width: 600px) {
-      .form-row, .form-row-3 { grid-template-columns: 1fr; }
-    }
+    label { display: block; font-size: .8rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: .4rem; }
+    input[type="text"] { width: 100%; padding: .75rem 1rem; border: 1.5px solid var(--border); border-radius: 10px; font-size: 1rem; font-family: 'DM Sans', sans-serif; color: var(--ink); background: var(--surface); transition: border-color .2s, box-shadow .2s; outline: none; }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 255, .12); }
 
-    label { display: block; font-size: .78rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: .4rem; }
-
-    input[type="text"], select {
-      width: 100%; padding: .75rem 1rem; border: 1.5px solid var(--border); border-radius: 10px;
-      font-size: 1rem; font-family: 'DM Sans', sans-serif; color: var(--ink);
-      background: var(--surface); transition: border-color .2s, box-shadow .2s; outline: none;
-    }
-    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,255,.12); }
-
-    /* ── Stepper ── */
     .num-display { text-align: center; font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 700; margin: .4rem 0; color: var(--ink); }
     .stepper { display: flex; align-items: center; justify-content: center; gap: .5rem; }
     .step-btn { width: 36px; height: 36px; border: 1.5px solid var(--border); border-radius: 50%; background: var(--surface); font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; color: var(--ink); }
     .step-btn:hover { background: #e8eeff; border-color: var(--accent); color: var(--accent); }
 
-    /* ── Coaching name field ── */
-    .coaching-field { margin-bottom: 1rem; }
-
-    /* ── Buttons ── */
-    .btn-generate { width: 100%; padding: .95rem; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background .2s, transform .1s; display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: .5rem; }
+    .btn-generate { width: 100%; padding: .95rem; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: .01em; cursor: pointer; transition: background .2s, transform .1s; display: flex; align-items: center; justify-content: center; gap: .5rem; }
     .btn-generate:hover { background: #1a4fe0; }
     .btn-generate:active { transform: scale(.98); }
     .btn-generate .spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error ── */
     .error-box { background: #fff3f3; border: 1px solid #ffcccc; border-radius: 10px; padding: .9rem 1.1rem; color: #c62828; font-size: .9rem; margin-bottom: 1.25rem; }
 
-    /* ── Results ── */
-    .results-header { max-width: 680px; margin: 0 auto 1rem; padding: 0 1.5rem; }
-    .results-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-header { max-width: 680px; margin: 0 auto 1rem; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .results-header h2 { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; }
+    .btn-download { padding: .6rem 1.2rem; background: var(--success); color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: .875rem; cursor: pointer; transition: background .2s; }
+    .btn-download:hover { background: #155a38; }
 
-    /* ── PDF Download section ── */
-    .pdf-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-    .pdf-section-title { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); margin-bottom: .85rem; }
-    .pdf-buttons { display: flex; gap: .75rem; flex-wrap: wrap; }
-    .btn-student { padding: .65rem 1.25rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: .875rem; cursor: pointer; transition: background .2s; }
-    .btn-student:hover { background: #1a4fe0; }
-    .btn-teacher { padding: .65rem 1.25rem; background: var(--success); color: #fff; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: .875rem; cursor: pointer; transition: background .2s; }
-    .btn-teacher:hover { background: #155a38; }
-    .coaching-input { flex: 1; min-width: 180px; padding: .65rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: .9rem; font-family: 'DM Sans', sans-serif; background: var(--surface); outline: none; }
-    .coaching-input:focus { border-color: var(--accent); }
-
-    /* ── Questions list ── */
     .questions-list { max-width: 680px; margin: 0 auto 4rem; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
     .q-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; animation: fadeUp .35s ease both; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -115,42 +88,31 @@
     .opt.correct { border-color: #86efac; background: #f0fdf4; color: var(--success); font-weight: 500; }
     .answer-tag { margin-top: .75rem; font-size: .8rem; color: var(--success); font-weight: 500; }
     .answer-tag span { background: #dcfce7; padding: .2rem .5rem; border-radius: 5px; }
+    .empty { text-align: center; padding: 3rem 1.5rem; color: var(--ink-soft); }
 
-    /* ── Difficulty badge ── */
-    .diff-badge { display: inline-block; font-size: .7rem; font-weight: 600; padding: .15rem .5rem; border-radius: 5px; margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .04em; }
-    .diff-easy { background: #dcfce7; color: #166534; }
-    .diff-medium { background: #fef9c3; color: #854d0e; }
-    .diff-hard { background: #fee2e2; color: #991b1b; }
-    .diff-mixed { background: #e0e7ff; color: #3730a3; }
-
-    /* ── Install banner ── */
     .install-banner { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: .85rem 1.5rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25); z-index: 999; align-items: center; gap: 1rem; font-size: .9rem; white-space: nowrap; }
     .install-banner.show { display: flex; }
     .btn-install { background: var(--accent); color: #fff; border: none; padding: .45rem 1rem; border-radius: 7px; font-weight: 600; font-size: .85rem; cursor: pointer; }
     .btn-dismiss { background: transparent; color: rgba(255,255,255,.6); border: none; cursor: pointer; font-size: 1.2rem; }
-
-    .empty { text-align: center; padding: 3rem 1.5rem; color: var(--ink-soft); }
   </style>
 </head>
 <body>
 
-<!-- Install Banner -->
 <div class="install-banner" id="install-banner">
   <span>📱 Install QuestionAI as App</span>
   <button class="btn-install" id="btn-install">Install</button>
   <button class="btn-dismiss" id="btn-dismiss">✕</button>
 </div>
 
-<!-- Nav -->
 <nav>
   <a class="nav-brand" href="#">Question<span>AI</span></a>
   <div style="display:flex;gap:1.5rem;align-items:center">
     {% if user.is_authenticated %}
       <span style="font-size:.875rem;color:var(--ink-soft)">Hi, {{ user.username }}</span>
-      <form method="POST" action="{% url 'logout' %}" style="display:inline">
-  {% csrf_token %}
-  <button type="submit" class="nav-link" style="background:none;border:none;cursor:pointer;">Log out</button>
-</form>
+      <form method="POST" action="{% url 'logout' %}" class="nav-logout-form">
+        {% csrf_token %}
+        <button type="submit" class="nav-logout-btn">Log out</button>
+      </form>
     {% else %}
       <a class="nav-link" href="{% url 'login' %}">Log in</a>
       <a class="nav-link" href="{% url 'signup' %}">Sign up</a>
@@ -158,14 +120,12 @@
   </div>
 </nav>
 
-<!-- Hero -->
 <div class="hero">
   <div class="badge">✦ Powered by AI</div>
   <h1>Generate <em>exam-ready</em><br>questions instantly</h1>
-  <p class="subtitle">Topic likhо, difficulty choose karo, language select karo — MCQs ready!</p>
+  <p class="subtitle">Enter any topic and get well-structured MCQs in seconds. Export to PDF with one click.</p>
 </div>
 
-<!-- Generator Card -->
 <div class="gen-card">
   {% if error %}
   <div class="error-box">⚠ {{ error }}</div>
@@ -173,8 +133,6 @@
 
   <form method="POST" action="{% url 'ai_generate' %}" id="gen-form">
     {% csrf_token %}
-
-    <!-- Topic + Num -->
     <div class="form-row">
       <div>
         <label for="topic">Topic</label>
@@ -192,72 +150,23 @@
         <input type="hidden" name="num" id="num-input" value="5">
       </div>
     </div>
-
-    <!-- ✅ Difficulty + Language -->
-    <div class="form-row-3">
-      <div>
-        <label for="difficulty">Difficulty</label>
-        <select name="difficulty" id="difficulty">
-          <option value="mixed"  {% if difficulty == 'mixed'  %}selected{% endif %}>Mixed</option>
-          <option value="easy"   {% if difficulty == 'easy'   %}selected{% endif %}>Easy</option>
-          <option value="medium" {% if difficulty == 'medium' %}selected{% endif %}>Medium</option>
-          <option value="hard"   {% if difficulty == 'hard'   %}selected{% endif %}>Hard</option>
-        </select>
-      </div>
-      <div>
-        <label for="language">Language</label>
-        <select name="language" id="language">
-          <option value="english" {% if language == 'english' %}selected{% endif %}>English</option>
-          <option value="hindi"   {% if language == 'hindi'   %}selected{% endif %}>Hindi</option>
-        </select>
-      </div>
-      <div style="display:flex;align-items:flex-end">
-        <button type="submit" class="btn-generate" id="gen-btn" style="margin-top:0">
-          <div class="spinner" id="spinner"></div>
-          <span id="btn-label">Generate</span>
-        </button>
-      </div>
-    </div>
-
+    <button type="submit" class="btn-generate" id="gen-btn">
+      <div class="spinner" id="spinner"></div>
+      <span id="btn-label">Generate Questions</span>
+    </button>
   </form>
 </div>
 
-<!-- Results -->
 {% if questions %}
 <div class="results-header">
-  <div class="results-title">{{ questions|length }} question{{ questions|length|pluralize }} generated</div>
-
-  <!-- ✅ PDF Download Section -->
-  <div class="pdf-section">
-    <div class="pdf-section-title">📄 PDF Download karo</div>
-
-    <!-- Student PDF -->
-    <form method="POST" action="{% url 'download_pdf' %}" style="margin-bottom:.75rem">
-      {% csrf_token %}
-      <input type="hidden" name="questions_data" value="{{ questions }}">
-      <input type="hidden" name="pdf_type" value="student">
-      <input type="hidden" name="topic" value="{{ topic }}">
-      <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
-        <input type="text" name="coaching_name" class="coaching-input" placeholder="Coaching/School ka naam (optional)">
-        <button type="submit" class="btn-student">📘 Student Paper</button>
-      </div>
-    </form>
-
-    <!-- Teacher PDF -->
-    <form method="POST" action="{% url 'download_pdf' %}">
-      {% csrf_token %}
-      <input type="hidden" name="questions_data" value="{{ questions }}">
-      <input type="hidden" name="pdf_type" value="teacher">
-      <input type="hidden" name="topic" value="{{ topic }}">
-      <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
-        <input type="text" name="coaching_name" class="coaching-input" placeholder="Coaching/School ka naam (optional)">
-        <button type="submit" class="btn-teacher">📗 Teacher Answer Key</button>
-      </div>
-    </form>
-  </div>
+  <h2>{{ questions|length }} question{{ questions|length|pluralize }} generated</h2>
+  <form method="POST" action="{% url 'download_pdf' %}">
+    {% csrf_token %}
+    <input type="hidden" name="questions_data" value="{{ questions }}">
+    <button type="submit" class="btn-download">⬇ Download PDF</button>
+  </form>
 </div>
 
-<!-- Questions List -->
 <div class="questions-list">
   {% for q in questions %}
   <div class="q-card">
@@ -280,42 +189,34 @@
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
   </svg>
-  <p>No questions generated. Try rephrasing your topic.</p>
+  <p>No questions were generated. Try rephrasing your topic.</p>
 </div>
 {% endif %}
 
 <script>
-  /* Stepper */
   let num = parseInt("{{ requested_num }}") || 5;
   const display = document.getElementById('num-display');
   const input   = document.getElementById('num-input');
-  function update(n) {
-    num = Math.max(1, Math.min(50, n));
-    display.textContent = num;
-    input.value = num;
-  }
+  function update(n) { num = Math.max(1, Math.min(50, n)); display.textContent = num; input.value = num; }
   update(num);
   document.getElementById('dec').addEventListener('click', () => update(num - 1));
   document.getElementById('inc').addEventListener('click', () => update(num + 1));
 
-  /* Loading */
   document.getElementById('gen-form').addEventListener('submit', () => {
     document.getElementById('spinner').style.display = 'block';
     document.getElementById('btn-label').textContent = 'Generating…';
     document.getElementById('gen-btn').disabled = true;
   });
 
-  /* PWA */
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register("{% static 'service-worker.js' %}");
     });
   }
+
   let deferredPrompt = null;
   const banner = document.getElementById('install-banner');
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault(); deferredPrompt = e; banner.classList.add('show');
-  });
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; banner.classList.add('show'); });
   document.getElementById('btn-install').addEventListener('click', async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
