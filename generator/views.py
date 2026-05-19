@@ -13,7 +13,8 @@ from django.views.decorators.http import require_POST
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 
 from .models import Subject, Topic, Question
 
@@ -62,12 +63,29 @@ def _call_openrouter(prompt: str) -> list:
     return questions
 
 
-def _build_prompt(topic: str, num: int, offset: int = 0) -> str:
+def _build_prompt(topic: str, num: int, difficulty: str, language: str, offset: int = 0) -> str:
     start = offset + 1
     end = offset + num
+
+    diff_map = {
+        "easy":   "All questions should be EASY level — basic concepts only.",
+        "medium": "All questions should be MEDIUM level — moderate difficulty.",
+        "hard":   "All questions should be HARD level — advanced concepts.",
+        "mixed":  "Mix of Easy, Medium and Hard questions.",
+    }
+    diff_instruction = diff_map.get(difficulty, diff_map["mixed"])
+
+    if language == "hindi":
+        lang_instruction = "Generate ALL questions, options and answers in HINDI language only. Use Devanagari script."
+    else:
+        lang_instruction = "Generate all questions and options in ENGLISH."
+
     return f"""Generate EXACTLY {num} multiple-choice questions on: "{topic}".
 These are questions number {start} to {end} in a series.
 Make sure these are DIFFERENT from any previous questions on this topic.
+
+DIFFICULTY: {diff_instruction}
+LANGUAGE: {lang_instruction}
 
 STRICT RULES:
 - EXACTLY {num} questions — not less, not more.
@@ -108,14 +126,14 @@ def _remove_duplicates(questions: list) -> list:
     return unique
 
 
-def _generate_questions(topic: str, total: int) -> list:
+def _generate_questions(topic: str, total: int, difficulty: str, language: str) -> list:
     all_questions = []
     remaining = total
     offset = 0
 
     while remaining > 0:
         ask = min(remaining, MAX_PER_CALL)
-        prompt = _build_prompt(topic, ask + 3, offset)
+        prompt = _build_prompt(topic, ask + 3, difficulty, language, offset)
 
         try:
             raw = _call_openrouter(prompt)
@@ -123,7 +141,7 @@ def _generate_questions(topic: str, total: int) -> list:
             all_questions.extend(valid[:ask])
         except Exception:
             try:
-                raw = _call_openrouter(_build_prompt(topic, ask, offset))
+                raw = _call_openrouter(_build_prompt(topic, ask, difficulty, language, offset))
                 valid = _validate(raw)
                 all_questions.extend(valid[:ask])
             except Exception:
@@ -139,15 +157,20 @@ def _generate_questions(topic: str, total: int) -> list:
 # Views
 # ---------------------------------------------------------------------------
 
-#@login_required
+# ✅ No @login_required
 def ai_generate(request):
     questions = []
     error = None
     requested_num = 5
     topic = ""
+    difficulty = "mixed"
+    language = "english"
 
     if request.method == "POST":
         topic = request.POST.get("topic", "").strip()
+        difficulty = request.POST.get("difficulty", "mixed")
+        language = request.POST.get("language", "english")
+
         try:
             requested_num = max(1, min(int(request.POST.get("num", 5)), 50))
         except (TypeError, ValueError):
@@ -157,7 +180,7 @@ def ai_generate(request):
             error = "Please enter a topic."
         else:
             try:
-                questions = _generate_questions(topic, requested_num)
+                questions = _generate_questions(topic, requested_num, difficulty, language)
 
                 if len(questions) < requested_num:
                     error = (
@@ -179,12 +202,17 @@ def ai_generate(request):
         "error": error,
         "requested_num": requested_num,
         "topic": topic,
+        "difficulty": difficulty,
+        "language": language,
     })
 
 
 @require_POST
 def download_pdf(request):
     raw = request.POST.get("questions_data", "[]")
+    pdf_type = request.POST.get("pdf_type", "student")
+    coaching_name = request.POST.get("coaching_name", "").strip()
+    topic = request.POST.get("topic", "").strip()
 
     try:
         questions = ast.literal_eval(raw)
@@ -193,8 +221,9 @@ def download_pdf(request):
     except Exception:
         questions = []
 
+    fname = "student_paper.pdf" if pdf_type == "student" else "teacher_answerkey.pdf"
     response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="question_paper.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="{fname}"'
 
     doc = SimpleDocTemplate(
         response,
@@ -206,26 +235,55 @@ def download_pdf(request):
     )
 
     styles = getSampleStyleSheet()
+
+    coaching_style = ParagraphStyle(
+        "Coaching", parent=styles["Normal"],
+        fontSize=20, fontName="Helvetica-Bold",
+        alignment=1, spaceAfter=4,
+        textColor=colors.HexColor("#2563ff")
+    )
+    subtitle_style = ParagraphStyle(
+        "Subtitle", parent=styles["Normal"],
+        fontSize=11, alignment=1,
+        spaceAfter=4, textColor=colors.HexColor("#5a5f72")
+    )
     title_style = ParagraphStyle(
-        "Title", parent=styles["Heading1"], fontSize=16, spaceAfter=12
+        "Title", parent=styles["Heading1"],
+        fontSize=13, spaceAfter=8, alignment=1
     )
     question_style = ParagraphStyle(
-        "Question", parent=styles["Normal"], fontSize=11, spaceAfter=4,
+        "Question", parent=styles["Normal"],
+        fontSize=11, spaceAfter=4,
         leading=16, fontName="Helvetica-Bold"
     )
     option_style = ParagraphStyle(
-        "Option", parent=styles["Normal"], fontSize=10, leftIndent=20,
+        "Option", parent=styles["Normal"],
+        fontSize=10, leftIndent=20,
         leading=14, spaceAfter=2
     )
     answer_style = ParagraphStyle(
-        "Answer", parent=styles["Normal"], fontSize=10, leftIndent=20,
-        leading=14, textColor="#2e7d32", fontName="Helvetica-Oblique"
+        "Answer", parent=styles["Normal"],
+        fontSize=10, leftIndent=20,
+        leading=14, textColor=colors.HexColor("#1a7a4a"),
+        fontName="Helvetica-Bold"
     )
 
-    story = [
-        Paragraph("AI-Generated Question Paper", title_style),
-        Spacer(1, 0.3 * cm),
-    ]
+    story = []
+
+    if coaching_name:
+        story.append(Paragraph(coaching_name, coaching_style))
+        story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor("#2563ff")))
+        story.append(Spacer(1, 0.3 * cm))
+
+    if pdf_type == "student":
+        story.append(Paragraph("Question Paper", title_style))
+    else:
+        story.append(Paragraph("Answer Key (Teacher Copy)", title_style))
+
+    if topic:
+        story.append(Paragraph(f"Topic: {topic}", subtitle_style))
+
+    story.append(Spacer(1, 0.4 * cm))
 
     for i, q in enumerate(questions, 1):
         question_text = q.get("question", "")
@@ -233,10 +291,16 @@ def download_pdf(request):
         answer = q.get("answer", "")
 
         story.append(Paragraph(f"Q{i}. {question_text}", question_style))
+
         for opt in options:
-            story.append(Paragraph(f"• {opt}", option_style))
-        if answer:
-            story.append(Paragraph(f"✓ Answer: {answer}", answer_style))
+            if pdf_type == "teacher" and opt == answer:
+                story.append(Paragraph(f"✓ {opt}", answer_style))
+            else:
+                story.append(Paragraph(f"    {opt}", option_style))
+
+        if pdf_type == "student":
+            story.append(Paragraph("Answer: _______", option_style))
+
         story.append(Spacer(1, 0.4 * cm))
 
     doc.build(story)
