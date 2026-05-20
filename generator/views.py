@@ -27,6 +27,8 @@ def _call_openrouter(prompt: str) -> list:
         headers={
             "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
+            "HTTP-Referer": "https://question-paper-generator-n7gm.onrender.com",  # ✅ yeh add karo
+    "X-Title": "QuestionAI",
         },
         json={
             "model": "openai/gpt-4o-mini",
