@@ -5,20 +5,24 @@ import ast
 
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 
 from .models import Subject, Topic, Question
 
 
 MAX_PER_CALL = 15
+
+# ✅ Teacher password — change karo apne hisaab se
+TEACHER_PASSWORD = "teacher123"
 
 
 def _call_openrouter(prompt: str) -> list:
@@ -27,15 +31,15 @@ def _call_openrouter(prompt: str) -> list:
         headers={
             "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://question-paper-generator-n7gm.onrender.com",  # ✅ yeh add karo
-    "X-Title": "QuestionAI",
+            "HTTP-Referer": "https://question-paper-generator-n7gm.onrender.com",
+            "X-Title": "QuestionAI",
         },
         json={
             "model": "openai/gpt-4o-mini",
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are an expert MCQ generator. Return ONLY valid JSON arrays. Never add explanation or markdown."
+                    "content": "You are an expert question paper generator. Return ONLY valid JSON arrays. Never add explanation or markdown."
                 },
                 {"role": "user", "content": prompt}
             ],
@@ -64,33 +68,67 @@ def _call_openrouter(prompt: str) -> list:
     return questions
 
 
-def _build_prompt(topic: str, num: int, offset: int = 0) -> str:
+def _build_mcq_prompt(topic: str, num: int, difficulty: str, language: str, offset: int = 0) -> str:
+    """MCQ questions ke liye prompt"""
     start = offset + 1
-    return f"""Generate EXACTLY {num} multiple-choice questions on: "{topic}".
-Starting from question number {start}.
 
-STRICT RULES:
-- EXACTLY {num} questions.
-- Each question: exactly 4 options (A, B, C, D).
-- Mark the correct answer clearly.
-- Return ONLY a raw JSON array. No markdown, no explanation.
+    diff_map = {
+        "easy":   "All questions EASY level — basic concepts only.",
+        "medium": "All questions MEDIUM level — moderate difficulty.",
+        "hard":   "All questions HARD level — advanced concepts.",
+        "mixed":  "Mix of Easy, Medium and Hard questions.",
+    }
+    diff_text = diff_map.get(difficulty, diff_map["mixed"])
 
-[
-  {{
-    "question": "...",
-    "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
-    "answer": "A. ..."
-  }}
-]"""
+    lang_text = "Generate ALL questions and options in HINDI language using Devanagari script." if language == "hindi" else "Generate in ENGLISH."
+
+    return f"""Generate EXACTLY {num} MCQ questions on: "{topic}". Starting from Q{start}.
+DIFFICULTY: {diff_text}
+LANGUAGE: {lang_text}
+RULES: EXACTLY {num} questions, 4 options each (A,B,C,D), mark correct answer, ONLY JSON array.
+[{{"question":"...","options":["A. ...","B. ...","C. ...","D. ..."],"answer":"A. ..."}}]"""
 
 
-def _validate(raw_list: list) -> list:
+def _build_subjective_prompt(topic: str, num: int, difficulty: str, language: str, offset: int = 0) -> str:
+    """Subjective questions ke liye prompt"""
+    start = offset + 1
+
+    diff_map = {
+        "easy":   "EASY level questions — basic understanding.",
+        "medium": "MEDIUM level questions — moderate depth.",
+        "hard":   "HARD level questions — deep analysis required.",
+        "mixed":  "Mix of Easy, Medium and Hard questions.",
+    }
+    diff_text = diff_map.get(difficulty, diff_map["mixed"])
+
+    lang_text = "Generate ALL questions and answers in HINDI language using Devanagari script." if language == "hindi" else "Generate in ENGLISH."
+
+    return f"""Generate EXACTLY {num} subjective/descriptive questions on: "{topic}". Starting from Q{start}.
+DIFFICULTY: {diff_text}
+LANGUAGE: {lang_text}
+RULES: EXACTLY {num} questions, each with a detailed answer, ONLY JSON array.
+[{{"question":"Explain ...?","answer":"Detailed answer here..."}}]"""
+
+
+def _validate_mcq(raw_list: list) -> list:
     valid = []
     for q in raw_list:
         if (
             isinstance(q, dict)
             and isinstance(q.get("question"), str) and q["question"].strip()
             and isinstance(q.get("options"), list) and len(q["options"]) == 4
+            and isinstance(q.get("answer"), str) and q["answer"].strip()
+        ):
+            valid.append(q)
+    return valid
+
+
+def _validate_subjective(raw_list: list) -> list:
+    valid = []
+    for q in raw_list:
+        if (
+            isinstance(q, dict)
+            and isinstance(q.get("question"), str) and q["question"].strip()
             and isinstance(q.get("answer"), str) and q["answer"].strip()
         ):
             valid.append(q)
@@ -108,7 +146,7 @@ def _remove_duplicates(questions: list) -> list:
     return unique
 
 
-def _generate_questions(topic: str, total: int) -> list:
+def _generate_questions(topic: str, total: int, q_type: str, difficulty: str, language: str) -> list:
     all_questions = []
     remaining = total
     offset = 0
@@ -116,25 +154,59 @@ def _generate_questions(topic: str, total: int) -> list:
     while remaining > 0:
         ask = min(remaining, MAX_PER_CALL)
         try:
-            raw = _call_openrouter(_build_prompt(topic, ask, offset))
-            valid = _validate(raw)
+            if q_type == "subjective":
+                prompt = _build_subjective_prompt(topic, ask, difficulty, language, offset)
+                raw = _call_openrouter(prompt)
+                valid = _validate_subjective(raw)
+            elif q_type == "mixed":
+                # Half MCQ half subjective
+                mcq_ask = max(1, ask // 2)
+                sub_ask = ask - mcq_ask
+
+                mcq_prompt = _build_mcq_prompt(topic, mcq_ask, difficulty, language, offset)
+                mcq_raw = _call_openrouter(mcq_prompt)
+                mcq_valid = _validate_mcq(mcq_raw)
+
+                sub_prompt = _build_subjective_prompt(topic, sub_ask, difficulty, language, offset + mcq_ask)
+                sub_raw = _call_openrouter(sub_prompt)
+                sub_valid = _validate_subjective(sub_raw)
+
+                valid = mcq_valid[:mcq_ask] + sub_valid[:sub_ask]
+            else:
+                # Default MCQ
+                prompt = _build_mcq_prompt(topic, ask, difficulty, language, offset)
+                raw = _call_openrouter(prompt)
+                valid = _validate_mcq(raw)
+
             all_questions.extend(valid[:ask])
         except Exception:
             pass
+
         offset += ask
         remaining -= ask
 
     return _remove_duplicates(all_questions)[:total]
 
 
+# ---------------------------------------------------------------------------
+# Views
+# ---------------------------------------------------------------------------
+
 def ai_generate(request):
     questions = []
     error = None
     requested_num = 5
     topic = ""
+    difficulty = "mixed"
+    language = "english"
+    q_type = "mcq"
 
     if request.method == "POST":
         topic = request.POST.get("topic", "").strip()
+        difficulty = request.POST.get("difficulty", "mixed")
+        language = request.POST.get("language", "english")
+        q_type = request.POST.get("q_type", "mcq")
+
         try:
             requested_num = max(1, min(int(request.POST.get("num", 5)), 50))
         except (TypeError, ValueError):
@@ -144,7 +216,7 @@ def ai_generate(request):
             error = "Please enter a topic."
         else:
             try:
-                questions = _generate_questions(topic, requested_num)
+                questions = _generate_questions(topic, requested_num, q_type, difficulty, language)
                 if len(questions) < requested_num:
                     error = f"Note: {requested_num} mein se {len(questions)} questions mile."
             except requests.exceptions.Timeout:
@@ -157,12 +229,29 @@ def ai_generate(request):
         "error": error,
         "requested_num": requested_num,
         "topic": topic,
+        "difficulty": difficulty,
+        "language": language,
+        "q_type": q_type,
     })
 
 
 @require_POST
 def download_pdf(request):
     raw = request.POST.get("questions_data", "[]")
+    pdf_type = request.POST.get("pdf_type", "student")       # student / teacher
+    coaching_name = request.POST.get("coaching_name", "").strip()
+    topic = request.POST.get("topic", "").strip()
+    q_type = request.POST.get("q_type", "mcq")
+
+    # ✅ Teacher password check
+    if pdf_type == "teacher":
+        entered_password = request.POST.get("teacher_password", "")
+        if entered_password != TEACHER_PASSWORD:
+            return HttpResponse(
+                "<h2 style='font-family:sans-serif;color:red;padding:2rem'>❌ Wrong password! Teacher password sahi nahi hai.</h2>"
+                "<a href='javascript:history.back()' style='font-family:sans-serif;padding:1rem;display:block'>← Wapis jao</a>"
+            )
+
     try:
         questions = ast.literal_eval(raw)
         if not isinstance(questions, list):
@@ -170,26 +259,85 @@ def download_pdf(request):
     except Exception:
         questions = []
 
+    fname = "student_paper.pdf" if pdf_type == "student" else "teacher_answerkey.pdf"
     response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="question_paper.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="{fname}"'
 
-    doc = SimpleDocTemplate(response, pagesize=A4,
-        leftMargin=2*cm, rightMargin=2*cm, topMargin=2.5*cm, bottomMargin=2*cm)
+    doc = SimpleDocTemplate(
+        response, pagesize=A4,
+        leftMargin=2*cm, rightMargin=2*cm,
+        topMargin=2.5*cm, bottomMargin=2*cm
+    )
 
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle("Title", parent=styles["Heading1"], fontSize=16, spaceAfter=12)
-    question_style = ParagraphStyle("Question", parent=styles["Normal"], fontSize=11, spaceAfter=4, leading=16, fontName="Helvetica-Bold")
-    option_style = ParagraphStyle("Option", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=14, spaceAfter=2)
-    answer_style = ParagraphStyle("Answer", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=14, textColor="#2e7d32", fontName="Helvetica-Oblique")
 
-    story = [Paragraph("AI-Generated Question Paper", title_style), Spacer(1, 0.3*cm)]
+    coaching_style = ParagraphStyle("Coaching", parent=styles["Normal"],
+        fontSize=20, fontName="Helvetica-Bold", alignment=1,
+        spaceAfter=4, textColor=colors.HexColor("#2563ff"))
+    title_style = ParagraphStyle("Title", parent=styles["Heading1"],
+        fontSize=14, spaceAfter=8, alignment=1)
+    subtitle_style = ParagraphStyle("Subtitle", parent=styles["Normal"],
+        fontSize=11, alignment=1, spaceAfter=8,
+        textColor=colors.HexColor("#5a5f72"))
+    question_style = ParagraphStyle("Question", parent=styles["Normal"],
+        fontSize=11, spaceAfter=4, leading=16, fontName="Helvetica-Bold")
+    option_style = ParagraphStyle("Option", parent=styles["Normal"],
+        fontSize=10, leftIndent=20, leading=14, spaceAfter=2)
+    answer_style = ParagraphStyle("Answer", parent=styles["Normal"],
+        fontSize=10, leftIndent=20, leading=14,
+        textColor=colors.HexColor("#1a7a4a"), fontName="Helvetica-Bold")
+    subjective_answer_style = ParagraphStyle("SubjAnswer", parent=styles["Normal"],
+        fontSize=10, leftIndent=20, leading=16, spaceAfter=4,
+        textColor=colors.HexColor("#1a7a4a"))
+
+    story = []
+
+    # ✅ Coaching naam header
+    if coaching_name:
+        story.append(Paragraph(coaching_name, coaching_style))
+        story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor("#2563ff")))
+        story.append(Spacer(1, 0.3*cm))
+
+    # Paper type
+    if pdf_type == "student":
+        story.append(Paragraph("Question Paper", title_style))
+    else:
+        story.append(Paragraph("Answer Key — Teacher Copy", title_style))
+
+    if topic:
+        story.append(Paragraph(f"Topic: {topic}", subtitle_style))
+
+    story.append(Spacer(1, 0.3*cm))
 
     for i, q in enumerate(questions, 1):
-        story.append(Paragraph(f"Q{i}. {q.get('question', '')}", question_style))
-        for opt in q.get("options", []):
-            story.append(Paragraph(f"• {opt}", option_style))
-        if q.get("answer"):
-            story.append(Paragraph(f"✓ Answer: {q['answer']}", answer_style))
+        question_text = q.get("question", "")
+        options = q.get("options", [])
+        answer = q.get("answer", "")
+
+        story.append(Paragraph(f"Q{i}. {question_text}", question_style))
+
+        if options:
+            # ✅ MCQ question
+            for opt in options:
+                if pdf_type == "teacher" and opt == answer:
+                    story.append(Paragraph(f"✓ {opt}", answer_style))
+                else:
+                    story.append(Paragraph(f"    {opt}", option_style))
+
+            if pdf_type == "student":
+                story.append(Paragraph("Answer: _______", option_style))
+        else:
+            # ✅ Subjective question
+            if pdf_type == "student":
+                # Blank lines for student to write
+                story.append(Paragraph("Answer:", option_style))
+                story.append(Paragraph("_" * 60, option_style))
+                story.append(Paragraph("_" * 60, option_style))
+                story.append(Paragraph("_" * 60, option_style))
+            else:
+                # Full answer for teacher
+                story.append(Paragraph(f"Answer: {answer}", subjective_answer_style))
+
         story.append(Spacer(1, 0.4*cm))
 
     doc.build(story)
