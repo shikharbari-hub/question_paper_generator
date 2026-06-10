@@ -325,8 +325,7 @@
 
     .q-text { font-size: .95rem; font-weight: 500; line-height: 1.6; margin-bottom: 1rem; color: var(--text); }
 
-    .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-    @media(max-width:500px) { .options-list { grid-template-columns: 1fr; } }
+    .options-list { display: flex; flex-direction: column; gap: .5rem; }
     .opt {
       padding: .55rem .85rem; border-radius: 9px; font-size: .875rem;
       border: 1.5px solid var(--glass-border);
