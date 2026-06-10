@@ -5,296 +5,191 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — QuestionAI</title>
-
-  <!-- PWA -->
   <link rel="manifest" href="{% static 'manifest.json' %}">
-  <meta name="theme-color" content="#2563ff">
+  <meta name="theme-color" content="#6c63ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="QuestionAI">
-
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink:      #0d0e12;
-      --ink-soft: #5a5f72;
-      --surface:  #f4f3ef;
-      --card:     #ffffff;
-      --accent:   #2563ff;
-      --success:  #1a7a4a;
-      --border:   #e2e0d8;
-      --radius:   14px;
-      --shadow:   0 2px 12px rgba(0,0,0,.07);
+      --bg: #0a0a0f;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --accent3: #43e97b;
+      --text: #f0f0ff;
+      --text-soft: #8888aa;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--surface);
-      color: var(--ink);
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.1) 0%, transparent 50%),
+        #0a0a0f;
     }
 
-    /* ── Nav ── */
+    /* Nav */
     nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2.5rem;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
     }
     .nav-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 1.2rem;
-      letter-spacing: -0.02em;
-      color: var(--ink);
-      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700; font-size: 1.1rem;
+      color: var(--text); text-decoration: none;
+      display: flex; align-items: center; gap: .5rem;
     }
-    .nav-brand span { color: var(--accent); }
-    .nav-link {
-      font-size: .875rem;
-      color: var(--ink-soft);
-      text-decoration: none;
-      transition: color .2s;
-    }
-    .nav-link:hover { color: var(--ink); }
+    .dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .nav-link { font-size: .875rem; color: var(--text-soft); text-decoration: none; border: 1px solid var(--glass-border); border-radius: 8px; padding: .35rem .85rem; transition: all .2s; }
+    .nav-link:hover { border-color: var(--accent); color: var(--text); }
 
-    /* ── Center layout ── */
-    .page-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-    }
+    /* Center */
+    .page-center { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1.5rem; }
 
-    /* ── Auth card ── */
+    /* Card */
     .auth-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
       padding: 2.5rem;
-      width: 100%;
-      max-width: 420px;
-      animation: fadeUp .35s ease both;
+      width: 100%; max-width: 420px;
+      animation: fadeUp .4s ease both;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    .auth-tag {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 99px; padding: .3rem .85rem;
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1rem;
+    }
+    .pulse { width: 6px; height: 6px; background: var(--accent3); border-radius: 50%; box-shadow: 0 0 6px var(--accent3); animation: blink 1.5s ease-in-out infinite; }
+
+    h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .4rem; }
+    h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .auth-sub { font-size: .9rem; color: var(--text-soft); margin-bottom: 1.75rem; line-height: 1.55; }
+
+    /* Error */
+    .error-box {
+      background: rgba(255,101,132,0.1);
+      border: 1px solid rgba(255,101,132,0.3);
+      border-radius: 10px; padding: .75rem 1rem;
+      color: #ff9eb0; font-size: .875rem; margin-bottom: 1.25rem;
     }
 
-    .auth-badge {
-      display: inline-block;
-      background: #e8eeff;
-      color: var(--accent);
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      padding: .28rem .7rem;
-      border-radius: 99px;
-      margin-bottom: .9rem;
-    }
-    .auth-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -.03em;
-      margin-bottom: .35rem;
-    }
-    .auth-title span { color: var(--accent); }
-    .auth-sub {
-      font-size: .875rem;
-      color: var(--ink-soft);
-      margin-bottom: 1.75rem;
-      line-height: 1.55;
-    }
-
-    /* ── Form fields ── */
+    /* Fields */
     .field { margin-bottom: 1.1rem; }
-    label {
-      display: block;
-      font-size: .78rem;
-      font-weight: 500;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      color: var(--ink-soft);
-      margin-bottom: .4rem;
-    }
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: .75rem 1rem;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 1rem;
-      font-family: 'DM Sans', sans-serif;
-      color: var(--ink);
-      background: var(--surface);
+    label { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-soft); margin-bottom: .5rem; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: .85rem 1.1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 12px; font-size: .95rem;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text); outline: none;
       transition: border-color .2s, box-shadow .2s;
-      outline: none;
     }
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,255,.12);
-    }
+    input::placeholder { color: var(--text-soft); }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.2); }
 
-    /* ── Error messages ── */
-    .error-list {
-      background: #fff3f3;
-      border: 1px solid #ffcccc;
-      border-radius: 10px;
-      padding: .75rem 1rem;
-      margin-bottom: 1.25rem;
-      list-style: none;
-    }
-    .error-list li {
-      color: #c62828;
-      font-size: .85rem;
-      line-height: 1.5;
-    }
-    .error-list li + li { margin-top: .25rem; }
+    .field-error { font-size: .8rem; color: #ff9eb0; margin-top: .4rem; }
 
-    /* ── Non-field errors ── */
-    .non-field-error {
-      background: #fff3f3;
-      border: 1px solid #ffcccc;
-      border-radius: 10px;
-      padding: .75rem 1rem;
-      color: #c62828;
-      font-size: .875rem;
-      margin-bottom: 1.25rem;
-    }
-
-    /* ── Submit button ── */
+    /* Button */
     .btn-submit {
-      width: 100%;
-      padding: .95rem;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: .01em;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
-      margin-top: .5rem;
+      width: 100%; padding: 1rem;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: #fff; border: none; border-radius: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; margin-top: .5rem;
+      transition: transform .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
     }
-    .btn-submit:hover { background: #1a4fe0; }
-    .btn-submit:active { transform: scale(.98); }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108,99,255,0.4); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: translateX(-100%); transition: transform .6s;
+    }
+    .btn-submit:hover::before { transform: translateX(100%); }
 
-    /* ── Footer link ── */
-    .auth-footer {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: .875rem;
-      color: var(--ink-soft);
-    }
-    .auth-footer a {
-      color: var(--accent);
-      font-weight: 500;
-      text-decoration: none;
-    }
+    /* Divider */
+    .divider { display: flex; align-items: center; gap: .75rem; margin: 1.5rem 0; color: var(--text-soft); font-size: .8rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
+
+    /* Footer */
+    .auth-footer { text-align: center; font-size: .875rem; color: var(--text-soft); }
+    .auth-footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
     .auth-footer a:hover { text-decoration: underline; }
-
-    /* ── Divider ── */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      margin: 1.5rem 0;
-      color: var(--ink-soft);
-      font-size: .8rem;
-    }
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
   </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-brand" href="/">Question<span>AI</span></a>
+  <a class="nav-brand" href="/"><div class="dot"></div>QuestionAI</a>
   <a class="nav-link" href="{% url 'signup' %}">Sign up →</a>
 </nav>
 
 <div class="page-center">
   <div class="auth-card">
 
-    <div class="auth-badge">✦ Welcome back</div>
-    <h1 class="auth-title">Log in to <span>QuestionAI</span></h1>
+    <div class="auth-tag"><div class="pulse"></div>Welcome back</div>
+    <h1>Log in to <span>QuestionAI</span></h1>
     <p class="auth-sub">Enter your credentials to continue generating questions.</p>
 
-    <!-- Non-field errors (wrong password etc.) -->
     {% if form.non_field_errors %}
-    <div class="non-field-error">
-      ⚠ {{ form.non_field_errors|join:", " }}
-    </div>
+    <div class="error-box">⚠ {{ form.non_field_errors|join:", " }}</div>
     {% endif %}
 
     <form method="POST" action="{% url 'login' %}">
       {% csrf_token %}
 
-      <!-- Username -->
       <div class="field">
         <label for="id_username">Username</label>
-        <input type="text"
-               name="username"
-               id="id_username"
+        <input type="text" name="username" id="id_username"
                placeholder="Enter your username"
                value="{{ form.username.value|default:'' }}"
-               autocomplete="username"
-               required>
+               autocomplete="username" required>
         {% if form.username.errors %}
-        <ul class="error-list" style="margin-top:.4rem;margin-bottom:0">
-          {% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}
-        </ul>
+        <div class="field-error">{% for e in form.username.errors %}⚠ {{ e }}{% endfor %}</div>
         {% endif %}
       </div>
 
-      <!-- Password -->
       <div class="field">
         <label for="id_password">Password</label>
-        <input type="password"
-               name="password"
-               id="id_password"
+        <input type="password" name="password" id="id_password"
                placeholder="Enter your password"
-               autocomplete="current-password"
-               required>
+               autocomplete="current-password" required>
         {% if form.password.errors %}
-        <ul class="error-list" style="margin-top:.4rem;margin-bottom:0">
-          {% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}
-        </ul>
+        <div class="field-error">{% for e in form.password.errors %}⚠ {{ e }}{% endfor %}</div>
         {% endif %}
       </div>
 
-      <!-- Next field (Django auth requires this) -->
       <input type="hidden" name="next" value="{{ next }}">
-
-      <button type="submit" class="btn-submit">Log in</button>
+      <button type="submit" class="btn-submit">🔑 Log in</button>
     </form>
 
     <div class="divider">or</div>
-
-    <div class="auth-footer">
-      Account nahi hai? <a href="{% url 'signup' %}">Sign up free</a>
-    </div>
+    <div class="auth-footer">Account nahi hai? <a href="{% url 'signup' %}">Sign up free</a></div>
 
   </div>
 </div>
-
 </body>
 </html>
