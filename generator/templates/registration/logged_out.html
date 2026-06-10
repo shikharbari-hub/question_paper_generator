@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logged Out — QuestionAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #f0f0ff;
+      --text-soft: #8888aa;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.1) 0%, transparent 50%),
+        #0a0a0f;
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      padding: 3rem 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      animation: fadeUp .4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .icon {
+      font-size: 3.5rem;
+      margin-bottom: 1.25rem;
+      animation: wave 1s ease-in-out;
+    }
+    @keyframes wave {
+      0%,100% { transform: rotate(0deg); }
+      25%      { transform: rotate(-20deg); }
+      75%      { transform: rotate(20deg); }
+    }
+
+    .brand {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: .5rem;
+      letter-spacing: -.02em;
+    }
+
+    .subtitle {
+      font-size: .95rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .btn-login {
+      display: block;
+      width: 100%;
+      padding: .95rem;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      margin-bottom: .75rem;
+    }
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(108,99,255,0.4);
+    }
+
+    .btn-home {
+      display: block;
+      width: 100%;
+      padding: .85rem;
+      background: var(--glass);
+      color: var(--text-soft);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .95rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-home:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: .75rem;
+      margin: 1.25rem 0; color: var(--text-soft); font-size: .8rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--glass-border);
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon">👋</div>
+
+  <div class="brand">
+    <div class="dot"></div>
+    QuestionAI
+  </div>
+
+  <h1>Logged out!</h1>
+  <p class="subtitle">You have been successfully logged out. Please log in again to generate questions!</p>
+
+  <a href="{% url 'login' %}" class="btn-login">🔑 Log in again</a>
+
+  <div class="divider">or</div>
+
+  <a href="/" class="btn-home">🏠 back to home</a>
+</div>
+
+</body>
+</html>
