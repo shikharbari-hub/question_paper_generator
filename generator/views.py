@@ -150,6 +150,15 @@ def _generate_questions(topic, total, q_type, difficulty, language):
     return _remove_duplicates(all_questions)[:total]
 
 
+# ---------------------------------------------------------------------------
+# Views
+# ---------------------------------------------------------------------------
+
+def home(request):
+    """Landing page"""
+    return render(request, "home.html")
+
+
 def ai_generate(request):
     questions = []
     error = None
@@ -200,8 +209,8 @@ def download_pdf(request):
     if pdf_type == "teacher":
         if request.POST.get("teacher_password", "") != TEACHER_PASSWORD:
             return HttpResponse(
-                "<h2 style='font-family:sans-serif;color:red;padding:2rem'>Wrong password!</h2>"
-                "<a href='javascript:history.back()' style='font-family:sans-serif;padding:1rem;display:block'>Wapis jao</a>"
+                "<h2 style='font-family:sans-serif;color:red;padding:2rem'>❌ Wrong password!</h2>"
+                "<a href='javascript:history.back()' style='font-family:sans-serif;padding:1rem;display:block'>← Wapis jao</a>"
             )
 
     try:
@@ -223,13 +232,13 @@ def download_pdf(request):
         leftMargin=2*cm, rightMargin=2*cm, topMargin=2.5*cm, bottomMargin=2*cm)
     styles = getSampleStyleSheet()
 
-    coaching_style    = ParagraphStyle("C", parent=styles["Normal"], fontSize=20, fontName="Helvetica-Bold", alignment=1, spaceAfter=4, textColor=colors.HexColor("#2563ff"))
-    title_style       = ParagraphStyle("T", parent=styles["Heading1"], fontSize=14, spaceAfter=8, alignment=1)
-    subtitle_style    = ParagraphStyle("S", parent=styles["Normal"], fontSize=11, alignment=1, spaceAfter=8, textColor=colors.HexColor("#5a5f72"))
-    question_style    = ParagraphStyle("Q", parent=styles["Normal"], fontSize=11, spaceAfter=4, leading=18, fontName=hfb)
-    option_style      = ParagraphStyle("O", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=16, spaceAfter=2, fontName=hf)
-    answer_style      = ParagraphStyle("A", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=16, textColor=colors.HexColor("#1a7a4a"), fontName=hfb)
-    subj_ans_style    = ParagraphStyle("SA", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=18, spaceAfter=4, textColor=colors.HexColor("#1a7a4a"), fontName=hf)
+    coaching_style = ParagraphStyle("C", parent=styles["Normal"], fontSize=20, fontName="Helvetica-Bold", alignment=1, spaceAfter=4, textColor=colors.HexColor("#2563ff"))
+    title_style    = ParagraphStyle("T", parent=styles["Heading1"], fontSize=14, spaceAfter=8, alignment=1)
+    subtitle_style = ParagraphStyle("S", parent=styles["Normal"], fontSize=11, alignment=1, spaceAfter=8, textColor=colors.HexColor("#5a5f72"))
+    question_style = ParagraphStyle("Q", parent=styles["Normal"], fontSize=11, spaceAfter=4, leading=18, fontName=hfb)
+    option_style   = ParagraphStyle("O", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=16, spaceAfter=2, fontName=hf)
+    answer_style   = ParagraphStyle("A", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=16, textColor=colors.HexColor("#1a7a4a"), fontName=hfb)
+    subj_style     = ParagraphStyle("SA", parent=styles["Normal"], fontSize=10, leftIndent=20, leading=18, spaceAfter=4, textColor=colors.HexColor("#1a7a4a"), fontName=hf)
 
     story = []
     if coaching_name:
@@ -260,7 +269,7 @@ def download_pdf(request):
                 for _ in range(3):
                     story.append(Paragraph("_" * 55, option_style))
             else:
-                story.append(Paragraph(f"Answer: {answer}", subj_ans_style))
+                story.append(Paragraph(f"Answer: {answer}", subj_style))
         story.append(Spacer(1, 0.4*cm))
 
     doc.build(story)

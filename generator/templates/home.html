@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuestionAI — AI Question Paper Generator</title>
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="description" content="AI se seconds mein exam-ready MCQ aur subjective questions generate karo. Hindi aur English dono mein. PDF export free!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --accent3: #43e97b;
+      --dark: #0a0a0f;
+      --light: #f8f7ff;
+      --text-dark: #0d0e12;
+      --text-soft: #5a5f72;
+      --border: #e2e0d8;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Space Grotesk', sans-serif; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .nav-brand { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.1rem; color: #f0f0ff; text-decoration: none; display: flex; align-items: center; gap: .5rem; }
+    .dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-link { font-size: .875rem; color: rgba(255,255,255,0.6); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .nav-cta { padding: .5rem 1.25rem; background: var(--accent); color: #fff; border-radius: 10px; font-weight: 600; font-size: .875rem; text-decoration: none; transition: all .2s; }
+    .nav-cta:hover { background: #5a52e0; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 1.5rem 4rem;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(67,233,123,0.1) 0%, transparent 50%),
+        var(--dark);
+      position: relative; overflow: hidden;
+    }
+
+    /* Floating orbs */
+    .orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; animation: orbFloat 8s ease-in-out infinite alternate; }
+    .orb1 { width: 300px; height: 300px; background: rgba(108,99,255,0.2); top: 10%; left: 5%; animation-delay: 0s; }
+    .orb2 { width: 200px; height: 200px; background: rgba(255,101,132,0.15); top: 60%; right: 5%; animation-delay: 2s; }
+    .orb3 { width: 150px; height: 150px; background: rgba(67,233,123,0.1); bottom: 20%; left: 40%; animation-delay: 4s; }
+    @keyframes orbFloat { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(30px,20px) scale(1.1)} }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 99px; padding: .4rem 1rem;
+      font-size: .75rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease both;
+    }
+    .tag-pulse { width: 7px; height: 7px; background: var(--accent3); border-radius: 50%; box-shadow: 0 0 8px var(--accent3); animation: blink 1.5s ease-in-out infinite; }
+
+    h1 {
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -.04em; color: #f0f0ff;
+      margin-bottom: 1.25rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+    .grad1 { background: linear-gradient(135deg, var(--accent), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad2 { background: linear-gradient(135deg, var(--accent3), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,0.6); max-width: 580px;
+      line-height: 1.7; margin: 0 auto 2.5rem;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; animation: fadeUp .6s ease .3s both; }
+    .btn-primary {
+      padding: .95rem 2rem;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: #fff; border-radius: 14px; font-weight: 700;
+      font-size: 1rem; text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(108,99,255,0.4); }
+    .btn-secondary {
+      padding: .95rem 2rem;
+      background: var(--glass); color: rgba(255,255,255,0.8);
+      border: 1px solid var(--glass-border); border-radius: 14px;
+      font-weight: 600; font-size: 1rem; text-decoration: none;
+      transition: all .2s; backdrop-filter: blur(10px);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: #fff; }
+
+    /* Stats */
+    .hero-stats {
+      display: flex; gap: 2.5rem; justify-content: center;
+      margin-top: 3.5rem; flex-wrap: wrap;
+      animation: fadeUp .6s ease .4s both;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Space Mono', monospace; font-size: 1.8rem; font-weight: 700; color: #f0f0ff; }
+    .stat-num span { color: var(--accent); }
+    .stat-label { font-size: .8rem; color: rgba(255,255,255,0.4); letter-spacing: .05em; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── FEATURES ── */
+    .features {
+      background: var(--light);
+      padding: 5rem 1.5rem;
+    }
+    .section-label {
+      text-align: center;
+      font-size: .75rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1rem;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700; letter-spacing: -.03em;
+      color: var(--text-dark); margin-bottom: .75rem;
+    }
+    .section-sub {
+      text-align: center; font-size: 1rem;
+      color: var(--text-soft); max-width: 500px;
+      margin: 0 auto 3.5rem; line-height: 1.65;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem; max-width: 1000px; margin: 0 auto;
+    }
+    .feature-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 2rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(108,99,255,0.1); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 1.1rem;
+    }
+    .fi-purple { background: rgba(108,99,255,0.1); }
+    .fi-pink   { background: rgba(255,101,132,0.1); }
+    .fi-green  { background: rgba(67,233,123,0.1); }
+    .fi-blue   { background: rgba(59,130,246,0.1); }
+    .fi-amber  { background: rgba(245,158,11,0.1); }
+    .fi-teal   { background: rgba(20,184,166,0.1); }
+    .feature-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin-bottom: .5rem; }
+    .feature-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.6; }
+
+    /* ── HOW IT WORKS ── */
+    .how {
+      background: var(--dark);
+      padding: 5rem 1.5rem;
+    }
+    .how .section-title { color: #f0f0ff; }
+    .how .section-sub { color: rgba(255,255,255,0.5); }
+
+    .steps { display: flex; flex-direction: column; gap: 0; max-width: 600px; margin: 0 auto; }
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      padding: 1.5rem 0; position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: ''; position: absolute;
+      left: 22px; top: 70px;
+      width: 2px; height: calc(100% - 40px);
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+    .step-num {
+      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: #fff; font-family: 'Space Mono', monospace;
+      font-weight: 700; font-size: .9rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(108,99,255,0.4);
+    }
+    .step-content { padding-top: .25rem; }
+    .step-title { font-size: 1.05rem; font-weight: 700; color: #f0f0ff; margin-bottom: .4rem; }
+    .step-desc { font-size: .9rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      padding: 5rem 1.5rem; text-align: center;
+    }
+    .cta-section h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; color: #fff; margin-bottom: 1rem; letter-spacing: -.03em; }
+    .cta-section p { font-size: 1rem; color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.65; }
+    .btn-cta-white {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: 1rem 2.25rem;
+      background: #fff; color: var(--accent);
+      border-radius: 14px; font-weight: 700; font-size: 1rem;
+      text-decoration: none; transition: all .2s;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .btn-cta-white:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.25); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid var(--glass-border);
+      padding: 2rem 1.5rem; text-align: center;
+      color: rgba(255,255,255,0.3); font-size: .85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-brand" href="#"><div class="dot"></div>QuestionAI</a>
+  <div class="nav-right">
+    <a class="nav-link" href="#features">Features</a>
+    <a class="nav-link" href="#how">How it works</a>
+    {% if user.is_authenticated %}
+      <a class="nav-cta" href="{% url 'ai_generate' %}">Generate →</a>
+    {% else %}
+      <a class="nav-link" href="{% url 'login' %}">Log in</a>
+      <a class="nav-cta" href="{% url 'signup' %}">Get started free</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="hero-tag"><div class="tag-pulse"></div>AI Powered · Free to use</div>
+
+  <h1>
+    Generate <span class="grad1">exam-ready</span><br>
+    questions <span class="grad2">instantly</span>
+  </h1>
+
+  <p class="hero-sub">
+    Topic likho — AI seconds mein MCQ aur subjective questions ready kar dega.
+    Hindi aur English dono mein. PDF export bilkul free!
+  </p>
+
+  <div class="hero-btns">
+    {% if user.is_authenticated %}
+      <a href="{% url 'ai_generate' %}" class="btn-primary">✨ Generate Questions</a>
+    {% else %}
+      <a href="{% url 'signup' %}" class="btn-primary">🚀 Get started free</a>
+      <a href="{% url 'login' %}" class="btn-secondary">Log in</a>
+    {% endif %}
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">50<span>+</span></div>
+      <div class="stat-label">Questions per paper</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2<span>x</span></div>
+      <div class="stat-label">Languages supported</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0<span>₹</span></div>
+      <div class="stat-label">Cost to start</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">30<span>s</span></div>
+      <div class="stat-label">Average generate time</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Sab kuch jo chahiye</h2>
+  <p class="section-sub">Coaching centers aur teachers ke liye specially designed — time bachao, quality papers banao.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon fi-purple">🤖</div>
+      <div class="feature-title">AI-Powered Generation</div>
+      <div class="feature-desc">GPT-4 se powered — har topic pe accurate, well-structured questions milte hain seconds mein.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-pink">🇮🇳</div>
+      <div class="feature-title">Hindi + English</div>
+      <div class="feature-desc">Hindi ya English — dono mein questions generate karo. Coaching centers ke liye perfect.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-green">📘</div>
+      <div class="feature-title">Student + Teacher PDF</div>
+      <div class="feature-desc">Student wala paper alag — Teacher answer key alag. Password protection bhi hai!</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">🎯</div>
+      <div class="feature-title">Difficulty Control</div>
+      <div class="feature-desc">Easy, Medium, Hard ya Mixed — apne students ke level ke hisaab se choose karo.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-amber">✍️</div>
+      <div class="feature-title">MCQ + Subjective</div>
+      <div class="feature-desc">Multiple choice ya descriptive — ya dono mixed. Har exam format ke liye ready.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-teal">🏫</div>
+      <div class="feature-title">Coaching Branding</div>
+      <div class="feature-desc">PDF mein apna coaching/school ka naam add karo — professional look guaranteed!</div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how" id="how">
+  <div class="section-label" style="color:var(--accent3)">How it works</div>
+  <h2 class="section-title">3 simple steps</h2>
+  <p class="section-sub">Itna simple hai ki pehli baar mein hi samajh aa jaata hai.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <div class="step-title">Topic likho</div>
+        <div class="step-desc">Koi bhi topic — "Photosynthesis", "World War II", "Python programming" — sab kuch chalega.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <div class="step-title">Options choose karo</div>
+        <div class="step-desc">Questions ki sankhya, difficulty level, language (Hindi/English) aur type (MCQ/Subjective) select karo.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <div class="step-title">Download karo</div>
+        <div class="step-desc">Student paper aur Teacher answer key — dono alag alag PDF mein download karo. Coaching ka naam bhi add kar sakte ho!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Abhi shuru karo — bilkul free!</h2>
+  <p>Koi credit card nahi chahiye. Signup karo aur 30 seconds mein pehla question paper ready!</p>
+  {% if user.is_authenticated %}
+    <a href="{% url 'ai_generate' %}" class="btn-cta-white">✨ Generate Questions →</a>
+  {% else %}
+    <a href="{% url 'signup' %}" class="btn-cta-white">🚀 Get started free →</a>
+  {% endif %}
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>Made with ❤️ for teachers &amp; coaching centers · <a href="{% url 'ai_generate' %}">QuestionAI</a></p>
+</footer>
+
+</body>
+</html>
